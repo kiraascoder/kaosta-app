@@ -1,0 +1,69 @@
+name: Deploy UKM UMPAR
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          coverage: none
+          tools: composer
+
+      - name: Install Composer Dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      # Optional: cache vendor to speed up CI (tidak memengaruhi server)
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      # Dry run dulu: lihat apa saja yang akan diunggah/dihapus tanpa menyentuh server
+      - name: FTP Deploy (Dry Run)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /ukmumpar/ # pastikan trailing slash
+          local-dir: ./
+          dry-run: true
+          exclude: |
+            **/.git*            
+            .env
+            .env.*
+            vendor/**
+
+      - name: Upload Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /domains/kaosta.site/kaosta
+          local-dir: ./
+          exclude: |
+            **/.git*
+            **/node_modules/**
+            .env
+            .env.*                        
+            vendor/**
+            vendor/**/*

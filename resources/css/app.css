@@ -1,0 +1,100 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+/* Custom Keyframes for Animations */
+
+/* Animation for a slow pulse effect */
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .5;
+    }
+}
+
+/* Apply the slow pulse animation */
+.animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Animation for fading in from the top */
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply the fade-in-down animation */
+.animate-fade-in-down {
+    animation: fade-in-down 0.5s ease-out forwards;
+}
+
+/* Animation for scaling in (used for modals) */
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply the scale-in animation */
+.animate-scale-in {
+    animation: scale-in 0.3s ease-out forwards;
+}
+
+/* Custom bounce animation */
+@keyframes bounce-custom {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px); /* Adjust the bounce height as needed */
+    }
+}
+
+/* Apply the custom bounce animation */
+.animate-bounce-custom {
+    animation: bounce-custom 1s infinite alternate; /* Adjust duration and type as needed */
+}
+
+/* Custom scrollbar for modals (from previous discussions) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Light track */
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #888; /* Darker thumb */
+    border-radius: 10px;
+    border: 2px solid #f1f1f1; /* Padding effect */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* Dark mode scrollbar */
+html.dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937; /* Dark track */
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #4b5563; /* Darker thumb */
+    border: 2px solid #1f2937; /* Padding effect */
+}
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #6b7280;
+}
