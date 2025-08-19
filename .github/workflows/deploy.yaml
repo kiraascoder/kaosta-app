@@ -1,4 +1,4 @@
-name: Deploy UKM UMPAR
+name: Deploy Kaosta
 
 on:
   push:
@@ -27,7 +27,6 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-      # Optional: cache vendor to speed up CI (tidak memengaruhi server)
       - name: Cache Composer
         uses: actions/cache@v4
         with:
@@ -36,34 +35,61 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-
 
-      # Dry run dulu: lihat apa saja yang akan diunggah/dihapus tanpa menyentuh server
+      # === Node & Vite build ===
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install frontend deps (npm)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Build assets (Vite)
+        run: npm run build
+
+      # Dry run dulu (storage TIDAK di-exclude)
       - name: FTP Deploy (Dry Run)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /ukmumpar/ # pastikan trailing slash
+          server-dir: /domains/kaosta.site/kaosta/
           local-dir: ./
           dry-run: true
           exclude: |
-            **/.git*            
+            **/.git*
+            **/node_modules/**
+            node_modules/**
+            vendor/**
+            vendor/**/*
             .env
             .env.*
-            vendor/**
+            tests/**
+            tests/**/*
 
+      # Upload (storage IKUT diupload untuk first commit)
       - name: Upload Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /domains/kaosta.site/kaosta
+          server-dir: /domains/kaosta.site/kaosta/
           local-dir: ./
           exclude: |
             **/.git*
             **/node_modules/**
-            .env
-            .env.*                        
+            node_modules/**
             vendor/**
             vendor/**/*
+            .env
+            .env.*
+            tests/**
+            tests/**/*
